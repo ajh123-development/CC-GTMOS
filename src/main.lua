@@ -8,15 +8,8 @@ local main = basalt.createFrame()
 menubar = main:addMenubar():setScrollable()
 :setSize("parent.w")
 :addItem("Shell", theme.MenubarBG, theme.MenubarText, {
-	function(env)
-		-- env.shell.s
-		-- shell.run("/rom/programs/shell.lua")
-		-- env.shell = nil
-		-- env._G.setmetatable = setmetatable
-		-- env._G.getmetatable = getmetatable
-		env.os.run(env._G, "/rom/programs/shell.lua")
-		-- print(getmetatable, setmetatable)
-		
+	function()
+		os.run({}, "/rom/programs/shell.lua")
 	end,
 	"Shell"
 })

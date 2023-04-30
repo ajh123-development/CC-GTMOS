@@ -53,14 +53,9 @@ local function openProgram(root, func, title, x, y, w, h)
 		:setSize("parent.w", "parent.h - 1")
 		:setPosition(1, 2)
 		:execute(function()
-			-- local sandboxed_f = sandbox.protect(func, {env = {
-			-- 	_G = environment,
-			-- 	_ENV = environment,
-			-- 	os = environment.os,
-			-- 	shell = environment.shell
-			-- }})
-			local sandboxed_f = sandbox.protect(func, {env=environment, quota=false})
-			local ok, mess = pcall(sandboxed_f, environment)
+			local env = environment.deep_copy(environment.env)
+			local sandboxed_f = sandbox.protect(func, {env=env, quota=false})
+			local ok, mess = pcall(sandboxed_f)
 			if not ok then
 				print(mess)
 			end
