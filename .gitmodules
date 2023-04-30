@@ -1,3 +1,0 @@
-[submodule "apis/sandbox"]
-	path = apis/sandbox
-	url = https://github.com/kikito/lua-sandbox
