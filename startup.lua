@@ -1,2 +1,2 @@
 local path = "/"..fs.getDir(shell.getRunningProgram())
-shell.run(path.."/main.lua")
+shell.run(path.."/src/main.lua")
