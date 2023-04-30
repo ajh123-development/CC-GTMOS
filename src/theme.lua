@@ -1,7 +1,7 @@
 return { -- The default main theme for GT MOS!
 	BasaltBG = colors.cyan,
 	BasaltText = colors.black,
-	FrameBG = colors.yellow,
+	FrameBG = colors.white,
 	FrameText = colors.black,
 	ButtonBG = colors.gray,
 	ButtonText = colors.black,

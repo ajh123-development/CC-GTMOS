@@ -27,29 +27,31 @@ local function makeResizeable(frame, minW, minH, maxW, maxH)
 		end)
 end
 
-local function openProgram(root, func, title, x, y, w, h)
+local function openProgram(root, menubar, func, title, icon, x, y, w, h)
 	local pId = id
 	id = id + 1
+	title = title.." ("..tostring(pId)..")" or "New Program".." ("..tostring(pId)..")"
+	local programFrame
 	local f = root:addFrame()
 		:setMovable()
 		:setSize(w or 30, h or 12)
 		:setPosition(x or math.random(2, 12), y or math.random(2, 8))
+		:setFocus()
 
-	local process = {
-		id = pId,
-		frame = f,
-		state = {
-			selected = true
-		}
-	}
+	f:addImage()
+		:setSize(2, 1)
+		-- :blit(icon[1], icon[2], icon[3]) -- Need to wait for new Basalt update.
 
 	f:addLabel()
-		:setSize("parent.w", 1)
+		:setSize("parent.w - 3", 1)
+		:setPosition(3)
 		:setBackground(colors.white)
 		:setForeground(colors.black)
-		:setText(title or "New Program")
+		:setText(title)
 
-	f:addProgram()
+	
+
+	programFrame = f:addProgram()
 		:setSize("parent.w", "parent.h - 1")
 		:setPosition(1, 2)
 		:execute(function()
@@ -57,8 +59,42 @@ local function openProgram(root, func, title, x, y, w, h)
 			local sandboxed_f = sandbox.protect(func, {env=env, quota=false})
 			local ok, mess = pcall(sandboxed_f)
 			if not ok then
-				print(mess)
+				f:remove()
+				processes[pId] = nil
+
+				local errFrame = root:addFrame()
+				:setSize("parent.w / 2", "parent.h / 2")
+				:setPosition("parent.w / 2 - self.w / 2", "parent.h / 2 - self.h / 2")
+				:setMovable()
+
+				errFrame:addLabel()
+				:setSize("parent.w", 1)
+				:setBackground(colors.white)
+				:setForeground(colors.black)
+				:setText("Error in `"..title.."`")
+
+				errFrame:addButton()
+				:setSize(1, 1)
+				:setText("\183")
+				:setBackground(colors.white)
+				:setForeground(colors.red)
+				:setPosition("parent.w", 1)
+				:onClick(function()
+					errFrame:remove()
+				end)
+
+				errFrame:addLabel()
+					:setPosition(2, 3)
+					:setSize("parent.w - 2", "parent.h - 3")
+					:setText(mess)
+
+				makeResizeable(errFrame)
 			end
+		end)
+		:setFocus()
+		:onDone(function()
+			f:remove()
+			processes[pId] = nil
 		end)
 
 	f:addButton()
@@ -73,10 +109,22 @@ local function openProgram(root, func, title, x, y, w, h)
 		end)
 
 	makeResizeable(f)
+
+	local process = {
+		id = pId,
+		frame = f,
+		programFrame = programFrame
+	}
+
 	processes[pId] = process
 	return process
 end
 
+local function getProcesses() 
+	return processes
+end
+
 return {
-	openProgram = openProgram
+	openProgram = openProgram,
+	getProcesses = getProcesses
 }
