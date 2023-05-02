@@ -24,11 +24,18 @@ for nameCount = 1, #config.programs do
 	:onClick(function(self, event, button, x, y)
 		if(event=="mouse_click")and(button==1)then
 			startMenu:hide()
-			programs.openProgram(main, menubar, function()
-					os.run({}, config.programs[nameCount].path)
+			programs.openProgram(basalt, main, menubar, function()
+					local program = config.programs[nameCount].path
+					if not string.starts(program, "/") then
+						program = path.."/src/programs/"..program
+					end
+					if program ~= "/rom/programs/shell.lua" then
+						os.run({}, "/rom/programs/shell.lua", program)
+					else
+						os.run({}, program)
+					end
 				end,
-				config.programs[nameCount].name,
-				config.programs[nameCount].icon
+				config.programs[nameCount]
 			)
 		end
 	end)

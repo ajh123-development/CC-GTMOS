@@ -37,6 +37,8 @@ end
 -- Begin sandbox environment.
 
 newEnv = deep_copy(_G) -- Copy parent environment because we don't want to overide it.
+newEnv._G = newEnv
+newEnv._ENV = newEnv
 
 -- Base LUA libs.
 
@@ -239,10 +241,27 @@ newSettings.define("bios.strict_globals", {
 })
 newEnv["settings"] = newSettings
 
-newEnv._G = newEnv
-newEnv._ENV = newEnv
+newEnv["string"]["starts"] = function(String,Start)
+	return string.sub(String,1,string.len(Start))==Start
+end
+
+newEnv["gtmos"] = {}
+newEnv["gtmos"]["test"] = function()
+	print("hello")
+end
 
 return {
-	env = newEnv,
-	deep_copy = deep_copy
+	build = function(outer)
+		newEnv.gtmos.getCurrentProcessID = function()
+			return outer.id
+		end
+		newEnv.gtmos.getProcesses = function()
+			local result = {}
+			for k, v in pairs(outer.processes) do
+				result[k] = v.id
+			end
+			return result
+		end
+		return deep_copy(newEnv)
+	end
 }

@@ -82,6 +82,7 @@ getmetatable setmetatable
 
 dofile loadfile loadstring
 
+gtmos
 ]]):gsub('%S+', function(id)
   local module, method = id:match('([^%.]+)%.([^%.]+)')
   if module then

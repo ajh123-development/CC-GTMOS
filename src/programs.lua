@@ -27,10 +27,10 @@ local function makeResizeable(frame, minW, minH, maxW, maxH)
 		end)
 end
 
-local function openProgram(root, menubar, func, title, icon, x, y, w, h)
+local function openProgram(basalt, root, menubar, func, program, x, y, w, h)
 	local pId = id
 	id = id + 1
-	title = title.." ("..tostring(pId)..")" or "New Program".." ("..tostring(pId)..")"
+	local title = program.name.." ("..tostring(pId)..")" or "New Program".." ("..tostring(pId)..")"
 	local programFrame
 	local f = root:addFrame()
 		:setMovable()
@@ -40,7 +40,7 @@ local function openProgram(root, menubar, func, title, icon, x, y, w, h)
 
 	f:addImage()
 		:setSize(2, 1)
-		-- :blit(icon[1], icon[2], icon[3]) -- Need to wait for new Basalt update.
+		-- :blit(program.icon[1], program.icon[2], program.icon[3]) -- Need to wait for new Basalt update.
 
 	f:addLabel()
 		:setSize("parent.w - 3", 1)
@@ -49,13 +49,14 @@ local function openProgram(root, menubar, func, title, icon, x, y, w, h)
 		:setForeground(colors.black)
 		:setText(title)
 
-	
-
 	programFrame = f:addProgram()
 		:setSize("parent.w", "parent.h - 1")
 		:setPosition(1, 2)
 		:execute(function()
-			local env = environment.deep_copy(environment.env)
+			local env = environment.build({
+				processes = processes, 
+				id = pId
+			})
 			local sandboxed_f = sandbox.protect(func, {env=env, quota=false})
 			local ok, mess = pcall(sandboxed_f)
 			if not ok then
