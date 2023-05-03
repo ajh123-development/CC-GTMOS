@@ -90,7 +90,6 @@ gtmos
     BASE_ENV[module][method] = _G[module][method]
   else
     BASE_ENV[id] = _G[id]
-    print(id.." = "..tostring(_G[id]))
   end
 end)
 

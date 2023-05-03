@@ -3,44 +3,21 @@ local sandbox = require("sandbox/sandbox")
 local id = 1
 local processes = {} 
 
-local function makeResizeable(frame, minW, minH, maxW, maxH)
-	minW = minW or 4
-	minH = minH or 4
-	maxW = maxW or 99
-	maxH = maxH or 99
-	frame:addButton()
-		:setPosition("parent.w", "parent.h")
-		:setSize(1, 1)
-		:setText("/")
-		:setForeground(colors.blue)
-		:setBackground(colors.black)
-		:onDrag(function(self, event, btn, xOffset, yOffset)
-			local w, h = frame:getSize()
-			local wOff, hOff = w, h
-			if(w+xOffset-1>=minW)and(w+xOffset-1<=maxW)then
-				wOff = w+xOffset-1
-			end
-			if(h+yOffset-1>=minH)and(h+yOffset-1<=maxH)then
-				hOff = h+yOffset-1
-			end
-			frame:setSize(wOff, hOff)
-		end)
-end
-
 local function openProgram(basalt, root, menubar, func, program, x, y, w, h)
 	local pId = id
 	id = id + 1
 	local title = program.name.." ("..tostring(pId)..")" or "New Program".." ("..tostring(pId)..")"
 	local programFrame
-	local f = root:addFrame()
-		:setMovable()
-		:setSize(w or 30, h or 12)
+	local newW = w or 30
+	local newH = h or 12
+	local f = root:addMovableFrame()
+		:setSize(newW, newH)
 		:setPosition(x or math.random(2, 12), y or math.random(2, 8))
 		:setFocus()
 
 	f:addImage()
 		:setSize(2, 1)
-		-- :blit(program.icon[1], program.icon[2], program.icon[3]) -- Need to wait for new Basalt update.
+		:blit(program.icon[1], program.icon[2], program.icon[3])
 
 	f:addLabel()
 		:setSize("parent.w - 3", 1)
@@ -58,39 +35,7 @@ local function openProgram(basalt, root, menubar, func, program, x, y, w, h)
 				id = pId
 			})
 			local sandboxed_f = sandbox.protect(func, {env=env, quota=false})
-			local ok, mess = pcall(sandboxed_f)
-			if not ok then
-				f:remove()
-				processes[pId] = nil
-
-				local errFrame = root:addFrame()
-				:setSize("parent.w / 2", "parent.h / 2")
-				:setPosition("parent.w / 2 - self.w / 2", "parent.h / 2 - self.h / 2")
-				:setMovable()
-
-				errFrame:addLabel()
-				:setSize("parent.w", 1)
-				:setBackground(colors.white)
-				:setForeground(colors.black)
-				:setText("Error in `"..title.."`")
-
-				errFrame:addButton()
-				:setSize(1, 1)
-				:setText("\183")
-				:setBackground(colors.white)
-				:setForeground(colors.red)
-				:setPosition("parent.w", 1)
-				:onClick(function()
-					errFrame:remove()
-				end)
-
-				errFrame:addLabel()
-					:setPosition(2, 3)
-					:setSize("parent.w - 2", "parent.h - 3")
-					:setText(mess)
-
-				makeResizeable(errFrame)
-			end
+			local _, _ = pcall(sandboxed_f)
 		end)
 		:setFocus()
 		:onDone(function()
@@ -108,8 +53,6 @@ local function openProgram(basalt, root, menubar, func, program, x, y, w, h)
 			f:remove()
 			processes[pId] = nil
 		end)
-
-	makeResizeable(f)
 
 	local process = {
 		id = pId,
